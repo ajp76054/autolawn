@@ -31,7 +31,7 @@ define ('DB_PORT', $_SERVER["DB1_PORT"]);
 //define('DB_PASSWORD', 'root');
 
 /** MySQL hostname */
-//define('DB_HOST', 'localhost');
+//xdefine('DB_HOST', 'localhost');
 
 /** Database Charset to use in creating database tables. */
 define('DB_CHARSET', 'utf8');
