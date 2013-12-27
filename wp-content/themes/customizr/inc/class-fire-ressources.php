@@ -20,14 +20,11 @@ class TC_ressources {
     function __construct () {
 
         self::$instance =& $this;
-        add_filter( '__customizr_styles'						, array( $this , 'tc_customizer_styles' ) );
-        add_action( 'wp_enqueue_scripts'						, array( $this , 'tc_enqueue_customizer_styles' ) );
-        add_action( 'wp_enqueue_scripts'						, array( $this , 'tc_scripts' ) );
+        add_action ( 'wp_enqueue_scripts'						, array( $this , 'tc_enqueue_customizr_styles' ) );
+        add_action ( 'wp_enqueue_scripts'						, array( $this , 'tc_enqueue_customizr_scripts' ) );
         
         //Based on options
         add_action ( 'wp_head'                 					, array( $this , 'tc_write_custom_css' ), 20 );
-        add_action ( 'wp_enqueue_scripts'						, array( $this , 'tc_optional_scripts' ) );
-        add_action ( 'wp_footer'								, array( $this , 'tc_generated_scripts' ) , 20);
     }
 
 
@@ -36,47 +33,29 @@ class TC_ressources {
 	 * @package Customizr
 	 * @since Customizr 1.1
 	 */
-	  function tc_customizer_styles() {
-	  	 //record for debug
-      	tc__f('rec' , __FILE__ , __FUNCTION__, __CLASS__ );
-      	
-	      	$skin = tc__f( '__get_option' , 'tc_skin' );
-	      	
-		    wp_register_style( 
-		      'customizr-skin' , 
-		      TC_BASE_URL.'inc/css/'.$skin,
-		      array(), 
-		      CUSTOMIZR_VER, 
-		      $media = 'all' 
-		      );
+	  function tc_enqueue_customizr_styles() {
+	    wp_register_style( 
+	      'customizr-skin' ,
+	      TC_init::$instance -> tc_active_skin(),
+	      array(), 
+	      CUSTOMIZR_VER, 
+	      $media = 'all' 
+	      );
 
+	    //enqueue skin
+	    wp_enqueue_style( 'customizr-skin' );
 
-		    //enqueue skin
-		    wp_enqueue_style( 'customizr-skin' );
-
-		    //enqueue WP style sheet
-		    wp_enqueue_style( 
-		    	'customizr-style' , 
-		    	get_stylesheet_uri() , 
-		    	array( 'customizr-skin' ),
-		    	CUSTOMIZR_VER , 
-		    	$media = 'all'  
-		    );
+	    //enqueue WP style sheet
+	    wp_enqueue_style( 
+	    	'customizr-style' , 
+	    	get_stylesheet_uri() , 
+	    	array( 'customizr-skin' ),
+	    	CUSTOMIZR_VER , 
+	    	$media = 'all'  
+	    );
 
 	}
 
-
-	/**
-	 * Apply the __customizr_styles filter and make it filtrable.
-	 * 
-	 * @uses wp_enqueue_script() to manage script dependencies
-	 * @package Customizr
-	 * @since Customizr 3.0.11
-	 */
-	function tc_enqueue_customizer_styles() {
-		tc__f('rec' , __FILE__ , __FUNCTION__, __CLASS__ );
-		return tc__f('__customizr_styles');
-	}
 
 
 
@@ -89,26 +68,81 @@ class TC_ressources {
 	 * @package Customizr
 	 * @since Customizr 1.0
 	 */
-	  function tc_scripts() {
-	  	//record for debug
-	  	tc__f('rec' , __FILE__ , __FUNCTION__, __CLASS__ );
+	 function tc_enqueue_customizr_scripts() {
+	    //wp scripts
+	  	if ( is_singular() && get_option( 'thread_comments' ) ) {
+		    wp_enqueue_script( 'comment-reply' );
+		}
 
-	      wp_enqueue_script( 'jquery' );
+	    wp_enqueue_script( 'jquery' );
 
-	      wp_enqueue_script( 'jquery-ui-core' );
+	    wp_enqueue_script( 'jquery-ui-core' );
 
-	      wp_enqueue_script( 'bootstrap' ,TC_BASE_URL . 'inc/js/bootstrap.min.js' ,array( 'jquery' ),null, $in_footer = true);
+	    //bootstrap scripts
+	    wp_enqueue_script( 'bootstrap' ,TC_BASE_URL . 'inc/js/bootstrap.min.js' ,array( 'jquery' ),null, $in_footer = true);
 	     
-	      //tc scripts
-	      wp_enqueue_script( 'tc-scripts' ,TC_BASE_URL . 'inc/js/tc-scripts.min.js' ,array( 'jquery' ),null, $in_footer = true);
+	    //tc scripts
+	    wp_enqueue_script( 'tc-scripts' ,TC_BASE_URL . 'inc/js/tc-scripts.min.js' ,array( 'jquery' ),null, $in_footer = true);
 
-	      //holder image
-	      wp_enqueue_script( 'holder' ,TC_BASE_URL . 'inc/js/holder.js' ,array( 'jquery' ),null, $in_footer = true);
+	    //passing dynamic vars to tc-scripts
+	    //fancybox options
+		$tc_fancybox 		= ( 1 == tc__f( '__get_option' , 'tc_fancybox' ) ) ? true : false;
+		$autoscale 			= ( 1 == tc__f( '__get_option' , 'tc_fancybox_autoscale') ) ? true : false ;
 
-	      //modernizr (must be loaded in wp_head())
-	      wp_enqueue_script( 'modernizr' ,TC_BASE_URL . 'inc/js/modernizr.min.js' ,array( 'jquery' ),null, $in_footer = false);
+        //carousel options
+        //gets slider options if any for home/front page or for others posts/pages
+	    $js_slidername       = tc__f('__is_home') ? tc__f( '__get_option' , 'tc_front_slider' ) : get_post_meta( tc__f('__ID') , $key = 'post_slider_key' , $single = true );
+	    $js_sliderdelay      = tc__f('__is_home') ? tc__f( '__get_option' , 'tc_slider_delay' ) : get_post_meta( tc__f('__ID') , $key = 'slider_delay_key' , $single = true );
+	      
+		//add those to filters
+		$js_slidername 		= apply_filters( 'tc_js_slider_name', $js_slidername , tc__f('__ID') );
+		$js_sliderdelay 	= apply_filters( 'tc_js_slider_delay' , $js_sliderdelay, tc__f('__ID') );
 
-	   }
+		//creates a filter for stop-on-hover option
+		$sliderhover		= apply_filters( 'tc_stop_slider_hover', true );
+
+		//Smooth scroll on click option : filtered to allow easy disabling if needed (conflict)
+		$smooth_scroll		= apply_filters( 'tc_smooth_scroll', esc_attr( tc__f( '__get_option' , 'tc_link_scroll') ) );
+
+		//adds the jquery effect library if smooth scroll is enabled => easeOutExpo effect
+		if ( $smooth_scroll ) {
+			wp_enqueue_script( 'jquery-effects-core');
+		}
+
+		wp_localize_script( 
+	        'tc-scripts', 
+	        'TCParams', 
+		        apply_filters('tc_js_params' , array(
+			          	'FancyBoxState' 		=> $tc_fancybox,
+			          	'FancyBoxAutoscale' 	=> $autoscale,
+			          	'SliderName' 			=> $js_slidername,
+			          	'SliderDelay' 			=> $js_sliderdelay,
+			          	'SliderHover'			=> $sliderhover,
+			          	'SmoothScroll'			=> $smooth_scroll ? 'easeOutExpo' : 'linear'
+		        	)
+		       	)//end of filter
+         );
+
+
+	    //holder image
+	    wp_enqueue_script( 'holder' ,TC_BASE_URL . 'inc/js/holder.js' ,array( 'jquery' ),null, $in_footer = true);
+
+	    //modernizr (must be loaded in wp_head())
+	    wp_enqueue_script( 'modernizr' ,TC_BASE_URL . 'inc/js/modernizr.min.js' ,array( 'jquery' ),null, $in_footer = false);
+
+	    //fancybox script and style
+	    if ( 1 == tc__f( '__get_option' , 'tc_fancybox' ) ) {
+	      	wp_enqueue_script( 'fancyboxjs' ,TC_BASE_URL . 'inc/js/fancybox/jquery.fancybox-1.3.4.min.js' ,array( 'jquery' ),null, $in_footer = true);
+	      	wp_enqueue_style( 'fancyboxcss' , TC_BASE_URL . 'inc/js/fancybox/jquery.fancybox-1.3.4.min.css' );
+	    }
+
+	    //retina support script
+	    if ( 1 == tc__f( '__get_option' , 'tc_retina_support' ) ) {
+	    	wp_enqueue_script( 'retinajs', TC_BASE_URL . 'inc/js/retina.min.js', null, null, $in_footer = true );
+	   	}
+
+	 }
+
 
 
 
@@ -119,8 +153,6 @@ class TC_ressources {
      * @since Customizr 2.0.7
      */
     function tc_write_custom_css() {
-    	//record for debug
-    	tc__f('rec' , __FILE__ , __FUNCTION__, __CLASS__ );
         $tc_custom_css      	= esc_html( tc__f( '__get_option' , 'tc_custom_css') );
         $tc_top_border      	= esc_attr( tc__f( '__get_option' , 'tc_top_border') );
         ?>
@@ -134,66 +166,6 @@ class TC_ressources {
         <?php endif; ?>
 
         <?php
-        }//end of function
-
-
-
-
-
-
-    /**
-	 * Enqueues Customizr scripts and style sheets based on user options
-	 * @package Customizr
-	 * @since Customizr 3.0.5
-	 */
-	 function tc_optional_scripts() {
-	 	//record for debug
-	 	tc__f('rec' , __FILE__ , __FUNCTION__, __CLASS__ );
-	 	//fancybox script and style
-	      $tc_fancybox = tc__f( '__get_option' , 'tc_fancybox' );
-	      if ( $tc_fancybox == 1) {
-	        wp_enqueue_script( 'fancyboxjs' ,TC_BASE_URL . 'inc/js/fancybox/jquery.fancybox-1.3.4.min.js' ,array( 'jquery' ),null, $in_footer = true);
-	        wp_enqueue_style( 'fancyboxcss' , TC_BASE_URL . 'inc/js/fancybox/jquery.fancybox-1.3.4.css' );
-	      }
-	 }
-
-
-
-	 /**
-	 * Writes additional scripts in wp_footer. Based on user options.
-	 * @package Customizr
-	 * @since Customizr 3.0.5
-	 */
-	 function tc_generated_scripts() {
-	 	//record for debug
-	 	tc__f('rec' , __FILE__ , __FUNCTION__, __CLASS__ );
-		//is fancy box option active?
-		$tc_fancybox = tc__f( '__get_option' , 'tc_fancybox' );
-
-	 	if ( $tc_fancybox == 1) {
-			//get option from customizr
-			$autoscale = tc__f( '__get_option' , 'tc_fancybox_autoscale') ;
-			//($autoscale == 1) ? _e('true') : _e('false');
-
-		  	?>
-			<script type="text/javascript">
-				jQuery(document).ready(function( $) {
-			      // Fancybox
-			      $("a.grouped_elements").fancybox({
-			        'transitionIn'  : 'elastic' ,
-			        'transitionOut' : 'elastic' ,
-			        'speedIn'   : 200, 
-			        'speedOut'    : 200, 
-			        'overlayShow' : false,
-			        'autoScale' : <?php echo ($autoscale == 1) ? 'true' : 'false' ?>,
-			        'changeFade' : 'fast',
-			        'enableEscapeButton' : true
-			      });
-				});
-			</script>
-
-		  	<?php
-		}//end if
-	}
+    }//end of function
 
 }//end of TC_ressources
