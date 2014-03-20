@@ -106,13 +106,19 @@ class TC_header_main {
 	 * @since Customizr 3.0
 	 */
 	function tc_logo_title_display() {
-		
+		define('SITE_HOST',             $_SERVER['HTTP_HOST']);
 		//declare useful vars
        	$logo_src    			= apply_filters( 'tc_logo_src' , esc_url ( tc__f( '__get_option' , 'tc_logo_upload') ) ) ;
        	$logo_resize 			= esc_attr( tc__f( '__get_option' , 'tc_logo_resize') );
       	$accepted_formats		= array('jpg', 'jpeg', 'png' ,'gif');
        	$filetype 				= wp_check_filetype ($logo_src);
        	$logo_class 			= apply_filters( 'tc_logo_class', 'brand span3' );
+
+       	if(strpos(SITE_HOST, '.local') !== FALSE){
+       		$logo_src = str_replace('autolawnirrigation.local', 'autolawn.local', $logo_src);
+       	}else{
+       		$logo_src = str_replace('autolawnirrigation.local', 'autolawnirrigation.com', $logo_src);
+       	}
 		?>
 
 		<?php if( !empty($logo_src) && in_array( $filetype['ext'], $accepted_formats ) ) :?>
@@ -124,7 +130,6 @@ class TC_header_main {
 		       		'logo_resize' 		=>	$logo_resize,
 		       		'logo_class'		=> 	$logo_class
 	   		);
-
 			ob_start();
 
 			$width 				= '';
