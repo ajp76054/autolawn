@@ -29,6 +29,31 @@ body{
   padding-bottom: 0px;
   color: #5a5a5a;
 }
+.breadcrumbs{
+  display: none;
+}
+.uiStreamRedesign .uiStreamMessage .messageBody{
+  color: #fafafa !important;
+}
+
+.entry-content p, ul{
+  color: #fafafa !important;
+}
+h1, h2, h3{
+  color: #fafafa !important;
+  text-shadow: none !important;
+}
+
+#page-85{
+  background: {
+    color: #fafafa;
+  }
+  padding: 20px;
+
+  h1, h2, h3{
+    color: #000 !important;
+  }
+}
 .clearfix {
   *zoom: 1;
 }
@@ -6209,9 +6234,12 @@ h2.comments-title:before {
 .tc-header {
   min-height: 45px;
   background: white;
-  border-bottom: 10px solid #e9eaee;
+  border-bottom: 10px solid #2497d3;
   border-top: 5px solid black;
   z-index: 200;
+  margin: {
+    bottom: 20px;
+  }
   background: {
     image: url('../img/vertical_cloth.png');
     repeat: repeat;
@@ -7311,7 +7339,7 @@ tr td:first-child {
 
 footer#footer {
   color: #fafafa !important;
-  border-top: 12px solid #e9eaee;
+  border-top: 12px solid #2497d3;
   background: #5a5a5a;
   padding: 0px;
 }

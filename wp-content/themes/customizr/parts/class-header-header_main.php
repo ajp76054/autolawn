@@ -140,7 +140,7 @@ class TC_header_main {
 			}
 
 			?>
-
+			
 	        <div class="<?php echo $logo_class ?>">
 
 	        	<?php 

@@ -41,6 +41,11 @@
 		 	//This hook is filtered with the slider : TC_slider::$instance->tc_slider_display()
 			do_action ( '__after_header' )
 		?>
+		<style type="text/css">
+			.messageBody{
+		  		color: #fafafa !important;
+			}
+		</style>
 		<script type="text/javascript">
 			// $(document).ready(function(){
 			// 	console.log('Ready');
